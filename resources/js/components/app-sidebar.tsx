@@ -1,5 +1,11 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Building2, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    Building2,
+    BriefcaseBusiness,
+    FolderGit2,
+    LayoutGrid
+} from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -29,6 +35,11 @@ const mainNavItems: NavItem[] = [
         title: 'Office Management',
         href: '/offices',
         icon: Building2,
+    },
+    {
+        title: 'Service Management',
+        href: '/services',
+        icon: BriefcaseBusiness,
     },
 ];
 
