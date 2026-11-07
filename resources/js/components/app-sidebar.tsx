@@ -4,7 +4,8 @@ import {
     Building2,
     BriefcaseBusiness,
     FolderGit2,
-    LayoutGrid
+    LayoutGrid,
+    Users,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -40,6 +41,11 @@ const mainNavItems: NavItem[] = [
         title: 'Service Management',
         href: '/services',
         icon: BriefcaseBusiness,
+    },
+    {
+        title: 'Eligible Employees',
+        href: '/eligible-employees',
+        icon: Users,
     },
 ];
 
