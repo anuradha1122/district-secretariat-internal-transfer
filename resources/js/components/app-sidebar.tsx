@@ -4,6 +4,7 @@ import {
     Building2,
     BriefcaseBusiness,
     FolderGit2,
+    KeyRound,
     LayoutGrid,
     Users,
 } from 'lucide-react';
@@ -46,6 +47,11 @@ const mainNavItems: NavItem[] = [
         title: 'Eligible Employees',
         href: '/eligible-employees',
         icon: Users,
+    },
+    {
+        title: 'Activation Codes',
+        href: '/activation-codes',
+        icon: KeyRound,
     },
 ];
 

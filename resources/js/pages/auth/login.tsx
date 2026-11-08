@@ -29,16 +29,16 @@ export default function Login({ status, canResetPassword }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">NIC or email address</Label>
                                 <Input
                                     id="email"
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     required
                                     autoFocus
                                     tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
+                                    autoComplete="username"
+                                    placeholder="NIC or email address"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -90,7 +90,12 @@ export default function Login({ status, canResetPassword }: Props) {
                     </>
                 )}
             </Form>
-
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+                Received an activation code?{' '}
+                <TextLink href="/activate-employee">
+                    Activate your account
+                </TextLink>
+            </div>
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
                     {status}
@@ -102,5 +107,5 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    description: 'Enter your NIC or email address and password',
 };
