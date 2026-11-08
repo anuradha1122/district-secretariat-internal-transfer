@@ -4,6 +4,7 @@ import {
     Building2,
     BriefcaseBusiness,
     CalendarDays,
+    FileText,
     FolderGit2,
     KeyRound,
     LayoutGrid,
@@ -64,6 +65,16 @@ const mainNavItems: NavItem[] = [
         title: 'Transfer Cycles',
         href: '/transfer-cycles',
         icon: CalendarDays,
+    },
+    {
+        title: 'My Transfer Applications',
+        href: '/transfer-applications',
+        icon: FileText,
+    },
+    {
+        title: 'Office Head Assignments',
+        href: '/office-reviewer-assignments',
+        icon: Users,
     },
 ];
 

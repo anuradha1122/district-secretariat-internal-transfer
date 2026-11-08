@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\EmployeePasswordResetCodeController;
 use App\Http\Controllers\EmployeePasswordResetController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\TransferCycleController;
+use App\Http\Controllers\TransferApplicationController;
+use App\Http\Controllers\TransferApplicationSubmissionController;
+use App\Http\Controllers\Admin\OfficeReviewerAssignmentController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -117,6 +120,56 @@ Route::middleware([
         '/transfer-cycles/{transferCycle}',
         [TransferCycleController::class, 'update']
     )->name('transfer-cycles.update');
+
+    Route::get(
+        '/transfer-applications',
+        [TransferApplicationController::class, 'index']
+    )->name('transfer-applications.index');
+
+    Route::post(
+        '/transfer-applications',
+        [TransferApplicationController::class, 'store']
+    )->name('transfer-applications.store');
+
+    Route::get(
+        '/transfer-applications/{transferApplication}/edit',
+        [TransferApplicationController::class, 'edit']
+    )->name('transfer-applications.edit');
+
+    Route::put(
+        '/transfer-applications/{transferApplication}',
+        [TransferApplicationController::class, 'update']
+    )->name('transfer-applications.update');
+
+    Route::get(
+        '/transfer-applications/{transferApplication}/review',
+        [TransferApplicationSubmissionController::class, 'review']
+    )->name('transfer-applications.review');
+
+    Route::post(
+        '/transfer-applications/{transferApplication}/submit',
+        [TransferApplicationSubmissionController::class, 'submit']
+    )->name('transfer-applications.submit');
+
+    Route::get(
+        '/transfer-applications/{transferApplication}/pdf',
+        [TransferApplicationSubmissionController::class, 'pdf']
+    )->name('transfer-applications.pdf');
+
+    Route::get(
+        '/office-reviewer-assignments',
+        [OfficeReviewerAssignmentController::class, 'index']
+    )->name('office-reviewer-assignments.index');
+
+    Route::post(
+        '/office-reviewer-assignments',
+        [OfficeReviewerAssignmentController::class, 'store']
+    )->name('office-reviewer-assignments.store');
+
+    Route::delete(
+        '/office-reviewer-assignments/{officeReviewerAssignment}',
+        [OfficeReviewerAssignmentController::class, 'destroy']
+    )->name('office-reviewer-assignments.destroy');
 });
 
 Route::middleware('guest')->group(function () {
