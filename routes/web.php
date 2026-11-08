@@ -7,6 +7,10 @@ use App\Http\Controllers\EligibleEmployeeController;
 use App\Http\Controllers\Admin\EmployeeActivationCodeController;
 use App\Http\Controllers\EmployeeActivationController;
 use App\Http\Middleware\EnsureEmployeeIsActiveAndEmailIsVerified;
+use App\Http\Controllers\Admin\EmployeePasswordResetCodeController;
+use App\Http\Controllers\EmployeePasswordResetController;
+use App\Http\Controllers\EmployeeProfileController;
+use App\Http\Controllers\TransferCycleController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -73,6 +77,46 @@ Route::middleware([
         '/activation-codes/{eligibleEmployee}',
         [EmployeeActivationCodeController::class, 'revoke']
     )->name('activation-codes.revoke');
+
+    Route::get(
+        '/employee-reset-codes',
+        [EmployeePasswordResetCodeController::class, 'index']
+    )->name('employee-reset-codes.index');
+
+    Route::post(
+        '/employee-reset-codes',
+        [EmployeePasswordResetCodeController::class, 'issue']
+    )->name('employee-reset-codes.issue');
+
+    Route::delete(
+        '/employee-reset-codes',
+        [EmployeePasswordResetCodeController::class, 'revoke']
+    )->name('employee-reset-codes.revoke');
+
+    Route::get(
+        '/employee-profile',
+        [EmployeeProfileController::class, 'edit']
+    )->name('employee-profile.edit');
+
+    Route::put(
+        '/employee-profile',
+        [EmployeeProfileController::class, 'update']
+    )->name('employee-profile.update');
+
+    Route::get(
+        '/transfer-cycles',
+        [TransferCycleController::class, 'index']
+    )->name('transfer-cycles.index');
+
+    Route::post(
+        '/transfer-cycles',
+        [TransferCycleController::class, 'store']
+    )->name('transfer-cycles.store');
+
+    Route::put(
+        '/transfer-cycles/{transferCycle}',
+        [TransferCycleController::class, 'update']
+    )->name('transfer-cycles.update');
 });
 
 Route::middleware('guest')->group(function () {
@@ -87,6 +131,18 @@ Route::middleware('guest')->group(function () {
     )
         ->middleware('throttle:5,1')
         ->name('employee-activation.store');
+
+    Route::get(
+        '/employee-password-reset',
+        [EmployeePasswordResetController::class, 'create']
+    )->name('employee-password-reset.create');
+
+    Route::post(
+        '/employee-password-reset',
+        [EmployeePasswordResetController::class, 'store']
+    )
+        ->middleware('throttle:5,1')
+        ->name('employee-password-reset.store');
 });
 
 require __DIR__.'/settings.php';

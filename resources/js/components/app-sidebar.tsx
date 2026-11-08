@@ -3,6 +3,7 @@ import {
     BookOpen,
     Building2,
     BriefcaseBusiness,
+    CalendarDays,
     FolderGit2,
     KeyRound,
     LayoutGrid,
@@ -52,6 +53,17 @@ const mainNavItems: NavItem[] = [
         title: 'Activation Codes',
         href: '/activation-codes',
         icon: KeyRound,
+    },
+    {
+        title: 'Employee Password Reset',
+        href: '/employee-reset-codes',
+        icon: KeyRound,
+    },
+
+    {
+        title: 'Transfer Cycles',
+        href: '/transfer-cycles',
+        icon: CalendarDays,
     },
 ];
 

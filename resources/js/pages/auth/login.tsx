@@ -90,6 +90,12 @@ export default function Login({ status, canResetPassword }: Props) {
                     </>
                 )}
             </Form>
+            <div className="mt-3 text-center text-sm text-muted-foreground">
+                Have an administrator-issued reset code?{' '}
+                <TextLink href="/employee-password-reset">
+                    Reset employee password
+                </TextLink>
+            </div>
             <div className="mt-4 text-center text-sm text-muted-foreground">
                 Received an activation code?{' '}
                 <TextLink href="/activate-employee">
