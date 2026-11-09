@@ -76,6 +76,17 @@ const mainNavItems: NavItem[] = [
         href: '/office-reviewer-assignments',
         icon: Users,
     },
+
+    {
+        title: 'Office Review Inbox',
+        href: '/office-reviews',
+        icon: FileText,
+    },
+    {
+        title: 'User Management',
+        href: '/user-management',
+        icon: Users,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

@@ -14,6 +14,8 @@ use App\Http\Controllers\TransferCycleController;
 use App\Http\Controllers\TransferApplicationController;
 use App\Http\Controllers\TransferApplicationSubmissionController;
 use App\Http\Controllers\Admin\OfficeReviewerAssignmentController;
+use App\Http\Controllers\OfficeReviewController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -170,6 +172,31 @@ Route::middleware([
         '/office-reviewer-assignments/{officeReviewerAssignment}',
         [OfficeReviewerAssignmentController::class, 'destroy']
     )->name('office-reviewer-assignments.destroy');
+
+    Route::get(
+        '/office-reviews',
+        [OfficeReviewController::class, 'index']
+    )->name('office-reviews.index');
+
+    Route::get(
+        '/office-reviews/{transferApplication}',
+        [OfficeReviewController::class, 'show']
+    )->name('office-reviews.show');
+
+    Route::get(
+        '/user-management',
+        [UserManagementController::class, 'index']
+    )->name('user-management.index');
+
+    Route::post(
+        '/user-management',
+        [UserManagementController::class, 'store']
+    )->name('user-management.store');
+
+    Route::put(
+        '/user-management/{managedUser}/roles',
+        [UserManagementController::class, 'updateRoles']
+    )->name('user-management.roles.update');
 });
 
 Route::middleware('guest')->group(function () {
