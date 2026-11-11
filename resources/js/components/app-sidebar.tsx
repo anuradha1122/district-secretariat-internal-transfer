@@ -92,6 +92,12 @@ const mainNavItems: NavItem[] = [
         href: '/district-reviews',
         icon: FileText,
     },
+
+    {
+        title: 'Mutual Transfer Preview',
+        href: '/mutual-transfers',
+        icon: Users,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

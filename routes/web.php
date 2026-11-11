@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\OfficeReviewDecisionController;
 use App\Http\Controllers\DistrictReviewController;
 use App\Http\Controllers\DistrictReviewDecisionController;
+use App\Http\Controllers\MutualTransferPreviewController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -221,6 +222,11 @@ Route::middleware([
         '/district-reviews/{transferApplication}/decision',
         [DistrictReviewDecisionController::class, 'store']
     )->name('district-reviews.decision.store');
+
+    Route::get(
+        '/mutual-transfers',
+        [MutualTransferPreviewController::class, 'index']
+    )->name('mutual-transfers.index');
 });
 
 Route::middleware('guest')->group(function () {

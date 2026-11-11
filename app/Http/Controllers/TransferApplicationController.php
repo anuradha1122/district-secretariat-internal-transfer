@@ -17,6 +17,8 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\OfficeReviewDecision;
+use App\Models\DistrictReviewDecision;
+
 
 class TransferApplicationController extends Controller
 {
@@ -72,21 +74,39 @@ class TransferApplicationController extends Controller
                     )
                     ->orderByDesc('id')
                     ->limit(1),
+
+                'district_rejection_reason' => DistrictReviewDecision::query()
+                    ->select('remarks')
+                    ->whereColumn(
+                        'district_review_decisions.transfer_application_id',
+                        'transfer_applications.id'
+                    )
+                    ->where('outcome', 'rejected')
+                    ->orderByDesc('id')
+                    ->limit(1),
             ])
-                ->orderByDesc('id')
-                ->get()
-                ->each(function (TransferApplication $application): void {
-                    /*
-                    * Only send remarks when they are the correction instructions
-                    * for an application currently returned to draft.
-                    */
-                    if (
-                        $application->status !== 'draft'
-                        || $application->latest_office_outcome !== 'returned'
-                    ) {
-                        $application->latest_office_remarks = null;
-                    }
-                });
+            ->orderByDesc('id')
+            ->get()
+            ->each(function (TransferApplication $application): void {
+                /*
+                * Only send Office Head remarks when they are correction
+                * instructions for an application returned to draft.
+                */
+                if (
+                    $application->status !== 'draft'
+                    || $application->latest_office_outcome !== 'returned'
+                ) {
+                    $application->latest_office_remarks = null;
+                }
+
+                /*
+                * The district rejection reason is for the applicant only
+                * while the application is in the rejected status.
+                */
+                if ($application->status !== 'rejected') {
+                    $application->district_rejection_reason = null;
+                }
+            });
 
         $cycles = TransferCycle::query()
             ->where('status', 'open')

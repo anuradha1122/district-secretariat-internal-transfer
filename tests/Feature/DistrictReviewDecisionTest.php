@@ -11,6 +11,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use App\Models\EligibleEmployee;
 
 uses(RefreshDatabase::class);
 
@@ -244,4 +245,58 @@ test('a user without district review permission cannot make a decision', functio
             'outcome' => 'approved',
         ])
         ->assertForbidden();
+});
+
+test('an employee can see the district rejection reason', function () {
+    $employeeRole = Role::findOrCreate('Employee', 'web');
+
+    $viewOwnPermission = Permission::findOrCreate(
+        'view own applications',
+        'web'
+    );
+
+    $employeeRole->givePermissionTo($viewOwnPermission);
+
+    $eligible = EligibleEmployee::create([
+        'nic' => '199012345678',
+        'is_active' => true,
+    ]);
+
+    $employee = User::factory()->make([
+        'email' => null,
+        'email_verified_at' => null,
+    ]);
+
+    $employee->eligible_employee_id = $eligible->id;
+    $employee->save();
+    $employee->assignRole('Employee');
+
+    $approver = districtDecisionApprover();
+
+    [$application, $officeDecision] = districtDecisionApplication(
+        $employee,
+        User::factory()->create()
+    );
+
+    $this->actingAs($approver)
+        ->post(route('district-reviews.decision.store', $application), [
+            'office_review_decision_id' => $officeDecision->id,
+            'outcome' => 'rejected',
+            'remarks' => 'The application does not meet the stated requirements.',
+        ])
+        ->assertSessionHasNoErrors();
+
+    $this->actingAs($employee)
+        ->get(route('transfer-applications.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('transfer-applications/index')
+            ->has('applications', 1)
+            ->where('applications.0.id', $application->id)
+            ->where('applications.0.status', 'rejected')
+            ->where(
+                'applications.0.district_rejection_reason',
+                'The application does not meet the stated requirements.'
+            )
+        );
 });
