@@ -11,6 +11,8 @@ type Application = {
     reference_no: string;
     status: string;
     cycle: Cycle;
+    latest_office_outcome: string | null;
+    latest_office_remarks: string | null;
 };
 
 type Props = {
@@ -133,9 +135,34 @@ export default function TransferApplicationsIndex({
                                                 {application.reference_no}
                                             </p>
 
-                                            <p className="mt-1 text-sm capitalize">
-                                                {application.status}
-                                            </p>
+                                            <p className="mt-1 text-sm">
+                                            {application.status === 'draft' &&
+                                            application.latest_office_outcome === 'returned'
+                                                ? 'Returned for correction'
+                                                : application.status === 'office_recommended'
+                                                ? 'Forwarded for district review'
+                                                : application.status.replaceAll('_', ' ')}
+                                        </p>
+
+                                        {application.status === 'draft' &&
+                                            application.latest_office_outcome === 'returned' && (
+                                                <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
+                                                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                                                        Correction requested by your Office Head
+                                                    </p>
+
+                                                    <p className="mt-1 whitespace-pre-wrap text-sm text-amber-800 dark:text-amber-100">
+                                                        {application.latest_office_remarks ||
+                                                            'Please contact your Office Head for details.'}
+                                                    </p>
+
+                                                    <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
+                                                        Correct your application, review it and submit it again.
+                                                        Then download and sign the revised PDF and give it to
+                                                        your Office Head.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex flex-wrap items-center gap-4">

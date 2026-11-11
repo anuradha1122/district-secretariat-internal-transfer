@@ -87,6 +87,11 @@ const mainNavItems: NavItem[] = [
         href: '/user-management',
         icon: Users,
     },
+    {
+        title: 'District Review Inbox',
+        href: '/district-reviews',
+        icon: FileText,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

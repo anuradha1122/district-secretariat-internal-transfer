@@ -260,7 +260,11 @@ class TransferApplicationSubmissionController extends Controller
         $this->authorizeOwner($request, $transferApplication);
 
         abort_unless(
-            $transferApplication->status === 'submitted',
+            in_array(
+                $transferApplication->status,
+                ['submitted', 'office_recommended', 'approved', 'rejected'],
+                true
+            ),
             403,
             'The PDF is available after submission.'
         );

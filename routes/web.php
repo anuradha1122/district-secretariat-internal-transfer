@@ -16,6 +16,9 @@ use App\Http\Controllers\TransferApplicationSubmissionController;
 use App\Http\Controllers\Admin\OfficeReviewerAssignmentController;
 use App\Http\Controllers\OfficeReviewController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\OfficeReviewDecisionController;
+use App\Http\Controllers\DistrictReviewController;
+use App\Http\Controllers\DistrictReviewDecisionController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -197,6 +200,27 @@ Route::middleware([
         '/user-management/{managedUser}/roles',
         [UserManagementController::class, 'updateRoles']
     )->name('user-management.roles.update');
+
+    Route::post(
+        '/office-reviews/{transferApplication}/decision',
+        [OfficeReviewDecisionController::class, 'store']
+    )->name('office-reviews.decision.store');
+
+
+    Route::get(
+        '/district-reviews',
+        [DistrictReviewController::class, 'index']
+    )->name('district-reviews.index');
+
+    Route::get(
+        '/district-reviews/{transferApplication}',
+        [DistrictReviewDecisionController::class, 'show']
+    )->name('district-reviews.show');
+
+    Route::post(
+        '/district-reviews/{transferApplication}/decision',
+        [DistrictReviewDecisionController::class, 'store']
+    )->name('district-reviews.decision.store');
 });
 
 Route::middleware('guest')->group(function () {

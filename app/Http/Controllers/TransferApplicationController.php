@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\OfficeReviewDecision;
 
 class TransferApplicationController extends Controller
 {
@@ -46,14 +47,46 @@ class TransferApplicationController extends Controller
         $applications = TransferApplication::query()
             ->where('user_id', $request->user()->id)
             ->with('cycle:id,name')
-            ->orderByDesc('id')
-            ->get([
+            ->select([
                 'id',
                 'transfer_cycle_id',
                 'reference_no',
                 'status',
                 'updated_at',
-            ]);
+            ])
+            ->addSelect([
+                'latest_office_outcome' => OfficeReviewDecision::query()
+                    ->select('outcome')
+                    ->whereColumn(
+                        'office_review_decisions.transfer_application_id',
+                        'transfer_applications.id'
+                    )
+                    ->orderByDesc('id')
+                    ->limit(1),
+
+                'latest_office_remarks' => OfficeReviewDecision::query()
+                    ->select('remarks')
+                    ->whereColumn(
+                        'office_review_decisions.transfer_application_id',
+                        'transfer_applications.id'
+                    )
+                    ->orderByDesc('id')
+                    ->limit(1),
+            ])
+                ->orderByDesc('id')
+                ->get()
+                ->each(function (TransferApplication $application): void {
+                    /*
+                    * Only send remarks when they are the correction instructions
+                    * for an application currently returned to draft.
+                    */
+                    if (
+                        $application->status !== 'draft'
+                        || $application->latest_office_outcome !== 'returned'
+                    ) {
+                        $application->latest_office_remarks = null;
+                    }
+                });
 
         $cycles = TransferCycle::query()
             ->where('status', 'open')

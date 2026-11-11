@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import ReviewDecisionForm from '@/components/office-reviews/review-decision-form';
 
 type Office = {
     id: number;
@@ -144,10 +145,7 @@ export default function OfficeReviewShow({ application }: Props) {
                     </p>
                 </div>
 
-                <div className="rounded-md bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-950 dark:text-blue-200">
-                    This page is currently read-only. Review decisions and confirmation
-                    of the signed paper application will be added in the next step.
-                </div>
+
 
                 <Section title="Application">
                     <dl className="grid gap-4 md:grid-cols-3">
@@ -300,6 +298,7 @@ export default function OfficeReviewShow({ application }: Props) {
                         />
                     </dl>
                 </Section>
+                <ReviewDecisionForm applicationId={application.id} />
             </div>
         </>
     );
