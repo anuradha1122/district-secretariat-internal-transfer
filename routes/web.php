@@ -20,6 +20,7 @@ use App\Http\Controllers\OfficeReviewDecisionController;
 use App\Http\Controllers\DistrictReviewController;
 use App\Http\Controllers\DistrictReviewDecisionController;
 use App\Http\Controllers\MutualTransferPreviewController;
+use App\Http\Controllers\MutualMatchRunController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -227,6 +228,21 @@ Route::middleware([
         '/mutual-transfers',
         [MutualTransferPreviewController::class, 'index']
     )->name('mutual-transfers.index');
+
+    Route::get(
+        '/mutual-match-runs',
+        [MutualMatchRunController::class, 'index']
+    )->name('mutual-match-runs.index');
+
+    Route::post(
+        '/mutual-match-runs',
+        [MutualMatchRunController::class, 'store']
+    )->name('mutual-match-runs.store');
+
+    Route::get(
+        '/mutual-match-runs/{mutualMatchRun}',
+        [MutualMatchRunController::class, 'show']
+    )->name('mutual-match-runs.show');
 });
 
 Route::middleware('guest')->group(function () {

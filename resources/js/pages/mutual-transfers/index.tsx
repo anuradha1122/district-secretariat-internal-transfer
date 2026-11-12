@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
@@ -41,10 +41,12 @@ type Candidate = {
 type Props = {
     cycles: Cycle[];
     services: Service[];
+
     filters: {
         cycle_id: number | null;
         service_id: number | null;
     };
+
     candidates: Candidate[];
 };
 
@@ -74,7 +76,9 @@ function Applicant({
             </p>
 
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {[applicant.post, applicant.grade].filter(Boolean).join(' · ') || '—'}
+                {[applicant.post, applicant.grade]
+                    .filter(Boolean)
+                    .join(' · ') || '—'}
             </p>
         </div>
     );
@@ -94,9 +98,23 @@ export default function MutualTransferIndex({
         filters.service_id ? String(filters.service_id) : '',
     );
 
-    const hasFilters = filters.cycle_id !== null && filters.service_id !== null;
+    const saveForm = useForm({
+        cycle_id: filters.cycle_id,
+        service_id: filters.service_id,
+    });
 
-    function submit(event: FormEvent<HTMLFormElement>) {
+    const hasFilters =
+        filters.cycle_id !== null && filters.service_id !== null;
+
+    /*
+     * If the user changes either select after loading a preview,
+     * require them to preview the new selection before saving.
+     */
+    const filtersChanged =
+        cycleId !== String(filters.cycle_id ?? '') ||
+        serviceId !== String(filters.service_id ?? '');
+
+    function previewMatches(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         router.get(
@@ -110,6 +128,31 @@ export default function MutualTransferIndex({
                 replace: true,
             },
         );
+    }
+
+    function saveRun() {
+        if (!filters.cycle_id || !filters.service_id || filtersChanged) {
+            return;
+        }
+
+        const confirmed = window.confirm(
+            'Save a new matching run using the current application data?',
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        /*
+         * Save the filters that produced the currently displayed preview.
+         * The server recalculates the matching results before saving.
+         */
+        saveForm.transform(() => ({
+            cycle_id: filters.cycle_id,
+            service_id: filters.service_id,
+        }));
+
+        saveForm.post('/mutual-match-runs');
     }
 
     const selectClass =
@@ -128,15 +171,24 @@ export default function MutualTransferIndex({
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                         Review reciprocal preferences for approved applications.
                     </p>
+
+                    <div className="mt-3">
+                        <Link
+                            href="/mutual-match-runs"
+                            className="text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
+                        >
+                            View saved matching runs
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="rounded-md bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-950 dark:text-blue-200">
-                    This is a live preview. Suggestions are not saved or confirmed,
-                    and no transfer order is created.
+                    This is a live preview. Suggestions are not confirmed, and
+                    no transfer order is created.
                 </div>
 
                 <form
-                    onSubmit={submit}
+                    onSubmit={previewMatches}
                     className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900"
                 >
                     <div className="grid gap-4 md:grid-cols-2">
@@ -145,13 +197,16 @@ export default function MutualTransferIndex({
                                 htmlFor="cycle_id"
                                 className="block text-sm font-medium text-gray-700 dark:text-gray-200"
                             >
-                                Transfer cycle <span className="text-red-600">*</span>
+                                Transfer cycle{' '}
+                                <span className="text-red-600">*</span>
                             </label>
 
                             <select
                                 id="cycle_id"
                                 value={cycleId}
-                                onChange={(event) => setCycleId(event.target.value)}
+                                onChange={(event) =>
+                                    setCycleId(event.target.value)
+                                }
                                 className={selectClass}
                                 required
                             >
@@ -170,13 +225,16 @@ export default function MutualTransferIndex({
                                 htmlFor="service_id"
                                 className="block text-sm font-medium text-gray-700 dark:text-gray-200"
                             >
-                                Service <span className="text-red-600">*</span>
+                                Service{' '}
+                                <span className="text-red-600">*</span>
                             </label>
 
                             <select
                                 id="service_id"
                                 value={serviceId}
-                                onChange={(event) => setServiceId(event.target.value)}
+                                onChange={(event) =>
+                                    setServiceId(event.target.value)
+                                }
                                 className={selectClass}
                                 required
                             >
@@ -201,20 +259,58 @@ export default function MutualTransferIndex({
 
                 {hasFilters && (
                     <section className="space-y-4">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                Candidate pairs
-                            </h2>
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    Candidate pairs
+                                </h2>
 
-                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                {candidates.length} candidate pair(s) found.
-                            </p>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    {candidates.length} candidate pair(s) found.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={saveRun}
+                                disabled={saveForm.processing || filtersChanged}
+                                className="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {saveForm.processing
+                                    ? 'Saving...'
+                                    : 'Save Matching Run'}
+                            </button>
                         </div>
+
+                        {filtersChanged ? (
+                            <p className="text-sm text-amber-700 dark:text-amber-300">
+                                You changed the selected cycle or service.
+                                Click Preview Matches before saving a run.
+                            </p>
+                        ) : (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Saving recalculates the results from the current
+                                data. The saved results may differ if applications
+                                changed after the preview.
+                            </p>
+                        )}
+
+                        {saveForm.errors.cycle_id && (
+                            <p className="text-sm text-red-600 dark:text-red-400">
+                                {saveForm.errors.cycle_id}
+                            </p>
+                        )}
+
+                        {saveForm.errors.service_id && (
+                            <p className="text-sm text-red-600 dark:text-red-400">
+                                {saveForm.errors.service_id}
+                            </p>
+                        )}
 
                         {candidates.length === 0 ? (
                             <div className="rounded-lg border border-gray-200 bg-white p-5 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
-                                No reciprocal matches were found for the selected cycle
-                                and service.
+                                No reciprocal matches were found for the
+                                selected cycle and service.
                             </div>
                         ) : (
                             candidates.map((candidate) => (
@@ -225,7 +321,8 @@ export default function MutualTransferIndex({
                                     <div className="flex flex-wrap items-center justify-between gap-2">
                                         <span
                                             className={
-                                                candidate.suggestion === 'proposed'
+                                                candidate.suggestion ===
+                                                'proposed'
                                                     ? 'rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-950 dark:text-green-200'
                                                     : 'rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-200'
                                             }

@@ -15,37 +15,52 @@ class MutualTransferPreviewService
      *
      * @return array<int, array<string, mixed>>
      */
-    public function preview(int $cycleId, int $serviceId): array
-    {
-        $applications = TransferApplication::query()
-            ->select('transfer_applications.*')
-            ->join(
-                'users',
-                'users.id',
-                '=',
-                'transfer_applications.user_id'
-            )
-            ->join(
-                'eligible_employees',
-                'eligible_employees.id',
-                '=',
-                'users.eligible_employee_id'
-            )
-            ->where('eligible_employees.is_active', true)
-            ->where('transfer_applications.transfer_cycle_id', $cycleId)
-            ->where('transfer_applications.service_id', $serviceId)
-            ->where('transfer_applications.status', 'approved')
-            ->whereNotNull('transfer_applications.current_office_id')
-            ->with([
-                'currentOffice:id,code,name',
-                'service:id,code,name',
-                'preferences:id,transfer_application_id,office_id,priority',
-            ])
-            ->orderBy('transfer_applications.id')
-            ->get();
+    /**
+ * Build a temporary list of reciprocal matches.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+public function preview(int $cycleId, int $serviceId): array
+{
+    return $this->buildCandidates(
+        $this->eligibleApplications($cycleId, $serviceId)
+    );
+}
 
-        return $this->buildCandidates($applications);
-    }
+/**
+ * Fetch the approved applications used as matching inputs.
+ *
+ * @return \Illuminate\Support\Collection<int, TransferApplication>
+ */
+public function eligibleApplications(int $cycleId, int $serviceId): Collection
+{
+    return TransferApplication::query()
+        ->select('transfer_applications.*')
+        ->join(
+            'users',
+            'users.id',
+            '=',
+            'transfer_applications.user_id'
+        )
+        ->join(
+            'eligible_employees',
+            'eligible_employees.id',
+            '=',
+            'users.eligible_employee_id'
+        )
+        ->where('eligible_employees.is_active', true)
+        ->where('transfer_applications.transfer_cycle_id', $cycleId)
+        ->where('transfer_applications.service_id', $serviceId)
+        ->where('transfer_applications.status', 'approved')
+        ->whereNotNull('transfer_applications.current_office_id')
+        ->with([
+            'currentOffice:id,code,name',
+            'service:id,code,name',
+            'preferences:id,transfer_application_id,office_id,priority',
+        ])
+        ->orderBy('transfer_applications.id')
+        ->get();
+}
 
     /**
      * The collection must contain approved applications from one cycle
