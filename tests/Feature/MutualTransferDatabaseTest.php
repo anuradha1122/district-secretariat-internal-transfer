@@ -328,3 +328,98 @@ test('an authorized user can open the preview with cycle and service filters', f
             )
         );
 });
+
+test('a saved non-empty run preserves its inputs and candidate results', function () {
+    $cycle = mutualDbCycle('Saved Snapshot Test Cycle');
+    $service = mutualDbService('SNAP-DO');
+
+    $officeA = mutualDbOffice('SNAP-A');
+    $officeB = mutualDbOffice('SNAP-B');
+
+    $userA = mutualDbEmployee('199012345678');
+    $userB = mutualDbEmployee('199112345678');
+
+    $applicationA = mutualDbApplication(
+        $userA,
+        $cycle,
+        $service,
+        $officeA,
+        'SNAPSHOT-A'
+    );
+
+    $applicationB = mutualDbApplication(
+        $userB,
+        $cycle,
+        $service,
+        $officeB,
+        'SNAPSHOT-B'
+    );
+
+    mutualDbPreference($applicationA, $officeB, 1);
+    mutualDbPreference($applicationB, $officeA, 2);
+
+    $managePermission = Permission::findOrCreate(
+        'manage mutual matches',
+        'web'
+    );
+
+    $manager = User::factory()->create();
+    $manager->givePermissionTo($managePermission);
+
+    $this->actingAs($manager)
+        ->post(route('mutual-match-runs.store'), [
+            'cycle_id' => $cycle->id,
+            'service_id' => $service->id,
+        ])
+        ->assertSessionHasNoErrors();
+
+    $run = \App\Models\MutualMatchRun::query()->firstOrFail();
+
+    expect($run->input_count)->toBe(2);
+    expect($run->candidate_count)->toBe(1);
+
+    expect($run->input_snapshot)->toHaveCount(2);
+    expect($run->candidate_snapshot)->toHaveCount(1);
+
+    expect($run->input_snapshot[0]['application_id'])
+        ->toBe($applicationA->id);
+
+    expect($run->input_snapshot[0]['preferences'][0]['office_id'])
+        ->toBe($officeB->id);
+
+    expect($run->input_snapshot[0]['preferences'][0]['priority'])
+        ->toBe(1);
+
+    expect($run->candidate_snapshot[0]['application_a']['id'])
+        ->toBe($applicationA->id);
+
+    expect($run->candidate_snapshot[0]['application_b']['id'])
+        ->toBe($applicationB->id);
+
+    expect($run->candidate_snapshot[0]['rank_a'])->toBe(1);
+    expect($run->candidate_snapshot[0]['rank_b'])->toBe(2);
+    expect($run->candidate_snapshot[0]['score'])->toBe(3);
+
+    /*
+     * Simulate a later change. This changes the live preview,
+     * but must not rewrite the saved run.
+     */
+    $applicationB->status = 'rejected';
+    $applicationB->save();
+
+    $liveResults = app(MutualTransferPreviewService::class)
+        ->preview($cycle->id, $service->id);
+
+    expect($liveResults)->toHaveCount(0);
+
+    $run->refresh();
+
+    expect($run->input_count)->toBe(2);
+    expect($run->candidate_count)->toBe(1);
+    expect($run->candidate_snapshot)->toHaveCount(1);
+
+    expect($run->candidate_snapshot[0]['application_b']['id'])
+        ->toBe($applicationB->id);
+
+    expect($run->input_snapshot[1]['status'])->toBe('approved');
+});

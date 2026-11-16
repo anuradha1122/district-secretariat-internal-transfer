@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\MutualMatchDecision;
 
 class MutualMatchRunController extends Controller
 {
@@ -181,7 +182,24 @@ class MutualMatchRunController extends Controller
                  * Only the candidate results are sent to this page.
                  */
                 'candidates' => $mutualMatchRun->candidate_snapshot,
+
+                'decisions' => MutualMatchDecision::query()
+                    ->where('mutual_match_run_id', $mutualMatchRun->id)
+                    ->with('reviewer:id,name')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (MutualMatchDecision $decision) => [
+                        'id' => $decision->id,
+                        'application_a_id' => $decision->application_a_id,
+                        'application_b_id' => $decision->application_b_id,
+                        'outcome' => $decision->outcome,
+                        'remarks' => $decision->remarks,
+                        'decided_at' => $decision->decided_at?->toDateTimeString(),
+                        'reviewer' => $decision->reviewer,
+                    ]),
             ],
+
+            'canManage' => $request->user()->can('manage mutual matches'),
         ]);
     }
 }

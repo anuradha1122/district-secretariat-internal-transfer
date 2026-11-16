@@ -21,6 +21,8 @@ use App\Http\Controllers\DistrictReviewController;
 use App\Http\Controllers\DistrictReviewDecisionController;
 use App\Http\Controllers\MutualTransferPreviewController;
 use App\Http\Controllers\MutualMatchRunController;
+use App\Http\Controllers\MutualMatchDecisionController;
+use App\Http\Controllers\ConfirmedMatchReconciliationController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -243,6 +245,16 @@ Route::middleware([
         '/mutual-match-runs/{mutualMatchRun}',
         [MutualMatchRunController::class, 'show']
     )->name('mutual-match-runs.show');
+
+    Route::post(
+        '/mutual-match-runs/{mutualMatchRun}/decisions',
+        [MutualMatchDecisionController::class, 'store']
+    )->name('mutual-match-decisions.store');
+
+    Route::get(
+        '/mutual-match-reconciliation',
+        [ConfirmedMatchReconciliationController::class, 'index']
+    )->name('mutual-match-reconciliation.index');
 });
 
 Route::middleware('guest')->group(function () {

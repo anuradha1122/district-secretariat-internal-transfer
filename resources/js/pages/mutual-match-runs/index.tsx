@@ -39,6 +39,15 @@ export default function MutualMatchRunsIndex({ runs }: Props) {
                         ← Back to matching preview
                     </Link>
 
+                    <div className="mt-2">
+                        <Link
+                            href="/mutual-match-reconciliation"
+                            className="text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
+                        >
+                            Review confirmed match eligibility
+                        </Link>
+                    </div>
+
                     <h1 className="mt-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
                         Saved Matching Runs
                     </h1>

@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import PairDecisionForm from '@/components/mutual-matches/pair-decision-form';
 
 type Applicant = {
     id: number;
@@ -33,6 +34,18 @@ type Run = {
     service: { id: number; code: string; name: string } | null;
     creator: { id: number; name: string } | null;
     candidates: Candidate[];
+    decisions: Decision[];
+};
+
+
+type Decision = {
+    id: number;
+    application_a_id: number;
+    application_b_id: number;
+    outcome: 'confirmed' | 'rejected';
+    remarks: string | null;
+    decided_at: string | null;
+    reviewer: { id: number; name: string } | null;
 };
 
 function ApplicantDetails({
@@ -63,7 +76,13 @@ function ApplicantDetails({
     );
 }
 
-export default function MutualMatchRunShow({ run }: { run: Run }) {
+export default function MutualMatchRunShow({
+    run,
+    canManage,
+}: {
+    run: Run;
+    canManage: boolean;
+}) {
     return (
         <>
             <Head title={`Matching Run ${run.id}`} />
@@ -96,8 +115,8 @@ export default function MutualMatchRunShow({ run }: { run: Run }) {
                 </div>
 
                 <div className="rounded-md bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                    This is a saved snapshot. Applications or eligibility may
-                    have changed since it was generated. No pair is confirmed.
+                    This is a saved snapshot. Current eligibility and preferences are checked
+                    again when a pair is confirmed. A confirmed pair is not a transfer order.
                 </div>
 
                 {run.candidates.length === 0 ? (
@@ -106,36 +125,74 @@ export default function MutualMatchRunShow({ run }: { run: Run }) {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {run.candidates.map((candidate) => (
-                            <div
-                                key={`${candidate.application_a.id}-${candidate.application_b.id}`}
-                                className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900"
-                            >
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                        {candidate.suggestion === 'proposed'
-                                            ? 'Proposed pair'
-                                            : 'Conflict alternative'}
-                                    </span>
+                        {run.candidates.map((candidate) => {
+                            const decision = run.decisions.find(
+                                (item) =>
+                                    item.application_a_id === candidate.application_a.id &&
+                                    item.application_b_id === candidate.application_b.id,
+                            );
 
-                                    <span className="text-sm text-gray-700 dark:text-gray-200">
-                                        Score: {candidate.score}
-                                    </span>
+                            return (
+                                <div
+                                    key={`${candidate.application_a.id}-${candidate.application_b.id}`}
+                                    className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900"
+                                >
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            {candidate.suggestion === 'proposed'
+                                                ? 'Proposed pair'
+                                                : 'Conflict alternative'}
+                                        </span>
+
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">
+                                            Score: {candidate.score}
+                                        </span>
+                                    </div>
+
+                                    <div className="mt-4 grid gap-5 md:grid-cols-2">
+                                        <ApplicantDetails
+                                            applicant={candidate.application_a}
+                                            rank={candidate.rank_a}
+                                        />
+
+                                        <ApplicantDetails
+                                            applicant={candidate.application_b}
+                                            rank={candidate.rank_b}
+                                        />
+                                    </div>
+
+                                    {decision ? (
+                                        <div className="mt-5 rounded-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                                            <p className="font-semibold">
+                                                Decision:{' '}
+                                                {decision.outcome === 'confirmed'
+                                                    ? 'Confirmed'
+                                                    : 'Rejected'}
+                                            </p>
+
+                                            <p className="mt-1">
+                                                By {decision.reviewer?.name ?? '—'} on{' '}
+                                                {decision.decided_at ?? '—'}
+                                            </p>
+
+                                            {decision.remarks && (
+                                                <p className="mt-2 whitespace-pre-wrap">
+                                                    {decision.remarks}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        canManage && (
+                                            <PairDecisionForm
+                                                runId={run.id}
+                                                applicationAId={candidate.application_a.id}
+                                                applicationBId={candidate.application_b.id}
+                                            />
+                                        )
+                                    )}
                                 </div>
-
-                                <div className="mt-4 grid gap-5 md:grid-cols-2">
-                                    <ApplicantDetails
-                                        applicant={candidate.application_a}
-                                        rank={candidate.rank_a}
-                                    />
-
-                                    <ApplicantDetails
-                                        applicant={candidate.application_b}
-                                        rank={candidate.rank_b}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
