@@ -160,4 +160,72 @@ test('an inactive confirmed participant appears for review', function () {
         'id' => $decision->id,
         'outcome' => 'confirmed',
     ]);
+
+    /*
+    * Restore eligibility, then change the application status.
+    * The participant should still be flagged, for a different reason.
+    */
+    $eligibleA->update([
+        'is_active' => true,
+    ]);
+
+    $applicationA->update([
+        'status' => 'rejected',
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('mutual-match-reconciliation.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('mutual-match-reconciliation/index')
+            ->has('items.data', 1)
+            ->where('items.data.0.decision_id', $decision->id)
+            ->where('items.data.0.user_id', $userA->id)
+            ->where(
+                'items.data.0.issue',
+                'Application is no longer approved'
+            )
+        );
+
+    $this->assertDatabaseHas('mutual_match_decisions', [
+        'id' => $decision->id,
+        'outcome' => 'confirmed',
+    ]);
+
+    /*
+    * Restore the approved status, then change the participant's service.
+    * The saved match decision must remain, but the change should be flagged.
+    */
+    $applicationA->update([
+        'status' => 'approved',
+    ]);
+
+    $otherService = Service::create([
+        'code' => 'RECON-OTHER',
+        'name' => 'Other Reconciliation Service',
+        'is_active' => true,
+    ]);
+
+    $applicationA->update([
+        'service_id' => $otherService->id,
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('mutual-match-reconciliation.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('mutual-match-reconciliation/index')
+            ->has('items.data', 1)
+            ->where('items.data.0.decision_id', $decision->id)
+            ->where('items.data.0.user_id', $userA->id)
+            ->where(
+                'items.data.0.issue',
+                'Application service differs from the saved run'
+            )
+        );
+
+    $this->assertDatabaseHas('mutual_match_decisions', [
+        'id' => $decision->id,
+        'outcome' => 'confirmed',
+    ]);
 });

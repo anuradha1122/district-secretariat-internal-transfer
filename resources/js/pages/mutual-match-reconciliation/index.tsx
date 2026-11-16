@@ -44,8 +44,8 @@ export default function ConfirmedMatchReconciliation({ items }: Props) {
                     </h1>
 
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Confirmed pairs with an inactive or missing employee
-                        eligibility record.
+                        Confirmed pairs with an eligibility issue or an application status,
+                            cycle or service change.
                     </p>
                 </div>
 
@@ -68,7 +68,7 @@ export default function ConfirmedMatchReconciliation({ items }: Props) {
 
                     {items.data.length === 0 ? (
                         <p className="p-5 text-sm text-gray-600 dark:text-gray-400">
-                            No eligibility issues were found in confirmed matches.
+                            No issues covered by these checks were found in confirmed matches.
                         </p>
                     ) : (
                         <div className="overflow-x-auto">
