@@ -228,4 +228,95 @@ test('an inactive confirmed participant appears for review', function () {
         'id' => $decision->id,
         'outcome' => 'confirmed',
     ]);
+
+    /*
+    * Restore the application so the participant-level section is clear.
+    */
+    $applicationA->update([
+        'status' => 'approved',
+        'service_id' => $service->id,
+    ]);
+
+    /*
+    * Create a second office and reciprocal preferences.
+    */
+    $officeB = Office::create([
+        'code' => 'RECON-OFF-B',
+        'name' => 'Reconciliation Office B',
+        'type' => 'district_secretariat',
+        'is_active' => true,
+    ]);
+
+    $applicationB->update([
+        'current_office_id' => $officeB->id,
+    ]);
+
+    $applicationA->preferences()->create([
+        'office_id' => $officeB->id,
+        'priority' => 1,
+        'reason' => 'Test reciprocal preference',
+    ]);
+
+    $applicationB->preferences()->create([
+        'office_id' => $office->id,
+        'priority' => 2,
+        'reason' => 'Test reciprocal preference',
+    ]);
+
+    /*
+    * Replace the test fixture's empty snapshot with a valid candidate.
+    */
+    $run->update([
+        'candidate_snapshot' => [
+            [
+                'application_a' => [
+                    'id' => $applicationA->id,
+                    'office' => ['id' => $office->id],
+                ],
+                'application_b' => [
+                    'id' => $applicationB->id,
+                    'office' => ['id' => $officeB->id],
+                ],
+                'rank_a' => 1,
+                'rank_b' => 2,
+            ],
+        ],
+    ]);
+
+    /*
+    * Unchanged offices and preferences should have no pair issues.
+    */
+    $this->actingAs($viewer)
+        ->get(route('mutual-match-reconciliation.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('pairIssues.data', 0)
+        );
+
+    /*
+    * Change B's reciprocal preference priority.
+    */
+    $applicationB->preferences()->update([
+        'priority' => 3,
+    ]);
+
+    $this->actingAs($viewer)
+        ->get(route('mutual-match-reconciliation.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('pairIssues.data', 1)
+            ->where('pairIssues.data.0.decision_id', $decision->id)
+            ->where(
+                'pairIssues.data.0.issues.0',
+                'The second employee’s reciprocal preference priority has changed.'
+            )
+        );
+
+    /*
+    * A reconciliation issue does not silently change the decision.
+    */
+    $this->assertDatabaseHas('mutual_match_decisions', [
+        'id' => $decision->id,
+        'outcome' => 'confirmed',
+    ]);
 });
