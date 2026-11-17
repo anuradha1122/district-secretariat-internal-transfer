@@ -25,6 +25,7 @@ use App\Http\Controllers\MutualMatchDecisionController;
 use App\Http\Controllers\ConfirmedMatchReconciliationController;
 use App\Http\Controllers\ManagementReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DashboardController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -32,7 +33,8 @@ Route::middleware([
     'auth',
     EnsureEmployeeIsActiveAndEmailIsVerified::class,
 ])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)
+    ->name('dashboard');
 });
 
 Route::middleware([
@@ -273,7 +275,10 @@ Route::middleware([
         [ManagementReportController::class, 'pdf']
     )->name('reports.pdf');
 
-    Route::middleware('auth')->group(function (): void {
+    Route::middleware([
+        'auth',
+        \App\Http\Middleware\EnsureEmployeeIsActiveAndEmailIsVerified::class,
+    ])->group(function (): void {
         Route::get('/notifications', [NotificationController::class, 'index'])
             ->name('notifications.index');
 
