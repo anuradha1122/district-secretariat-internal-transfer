@@ -24,6 +24,7 @@ use App\Http\Controllers\MutualMatchRunController;
 use App\Http\Controllers\MutualMatchDecisionController;
 use App\Http\Controllers\ConfirmedMatchReconciliationController;
 use App\Http\Controllers\ManagementReportController;
+use App\Http\Controllers\NotificationController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -271,6 +272,21 @@ Route::middleware([
         '/reports/export/pdf',
         [ManagementReportController::class, 'pdf']
     )->name('reports.pdf');
+
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/notifications', [NotificationController::class, 'index'])
+            ->name('notifications.index');
+
+        Route::post('/notifications/read-all', [
+            NotificationController::class,
+            'markAllAsRead',
+        ])->name('notifications.read-all');
+
+        Route::post('/notifications/{notificationId}/read', [
+            NotificationController::class,
+            'markAsRead',
+        ])->name('notifications.read');
+    });
 });
 
 Route::middleware('guest')->group(function () {

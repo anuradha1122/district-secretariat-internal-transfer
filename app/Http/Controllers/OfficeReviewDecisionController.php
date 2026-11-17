@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Services\Notifications\EmployeeNotificationService;
 
 class OfficeReviewDecisionController extends Controller
 {
@@ -197,6 +198,11 @@ class OfficeReviewDecisionController extends Controller
             }
 
             $application->save();
+
+            app(EmployeeNotificationService::class)->record(
+                $application,
+                $isForward ? 'office_forwarded' : 'office_returned'
+            );
         });
 
         return redirect()

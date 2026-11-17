@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\Notifications\EmployeeNotificationService;
 
 class DistrictReviewDecisionController extends Controller
 {
@@ -284,6 +285,13 @@ class DistrictReviewDecisionController extends Controller
 
             $application->status = $data['outcome'];
             $application->save();
+
+            app(EmployeeNotificationService::class)->record(
+                $application,
+                $data['outcome'] === 'approved'
+                    ? 'district_approved'
+                    : 'district_rejected'
+            );
         });
 
         return redirect()

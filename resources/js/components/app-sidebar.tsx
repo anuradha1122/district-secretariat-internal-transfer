@@ -1,8 +1,9 @@
 import { Link } from '@inertiajs/react';
 import {
+    Bell,
     BookOpen,
-    Building2,
     BriefcaseBusiness,
+    Building2,
     CalendarDays,
     FileText,
     FolderGit2,
@@ -15,7 +16,6 @@ import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-
 import {
     Sidebar,
     SidebarContent,
@@ -25,7 +25,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -34,6 +33,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Notifications',
+        href: '/notifications',
+        icon: Bell,
     },
     {
         title: 'Office Management',
@@ -60,7 +64,6 @@ const mainNavItems: NavItem[] = [
         href: '/employee-reset-codes',
         icon: KeyRound,
     },
-
     {
         title: 'Transfer Cycles',
         href: '/transfer-cycles',
@@ -76,7 +79,6 @@ const mainNavItems: NavItem[] = [
         href: '/office-reviewer-assignments',
         icon: Users,
     },
-
     {
         title: 'Office Review Inbox',
         href: '/office-reviews',
@@ -92,13 +94,11 @@ const mainNavItems: NavItem[] = [
         href: '/district-reviews',
         icon: FileText,
     },
-
     {
         title: 'Mutual Transfer Preview',
         href: '/mutual-transfers',
         icon: Users,
     },
-
     {
         title: 'Management Reports',
         href: '/reports',

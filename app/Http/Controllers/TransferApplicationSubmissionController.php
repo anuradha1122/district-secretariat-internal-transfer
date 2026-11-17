@@ -15,6 +15,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Mpdf\Mpdf;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use App\Services\Notifications\EmployeeNotificationService;
 
 class TransferApplicationSubmissionController extends Controller
 {
@@ -243,6 +244,11 @@ class TransferApplicationSubmissionController extends Controller
                 'status' => 'submitted',
                 'submitted_at' => now(),
             ]);
+
+            app(EmployeeNotificationService::class)->record(
+                $application,
+                'submitted'
+            );
         });
 
         return redirect()
