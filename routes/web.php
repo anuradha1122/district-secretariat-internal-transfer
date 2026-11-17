@@ -23,6 +23,7 @@ use App\Http\Controllers\MutualTransferPreviewController;
 use App\Http\Controllers\MutualMatchRunController;
 use App\Http\Controllers\MutualMatchDecisionController;
 use App\Http\Controllers\ConfirmedMatchReconciliationController;
+use App\Http\Controllers\ManagementReportController;
 
 Route::inertia('/', 'welcome')->name('home');
 
@@ -255,6 +256,21 @@ Route::middleware([
         '/mutual-match-reconciliation',
         [ConfirmedMatchReconciliationController::class, 'index']
     )->name('mutual-match-reconciliation.index');
+
+    Route::get(
+        '/reports',
+        [ManagementReportController::class, 'index']
+    )->name('reports.index');
+
+    Route::get(
+        '/reports/export/csv',
+        [ManagementReportController::class, 'csv']
+    )->name('reports.csv');
+
+    Route::get(
+        '/reports/export/pdf',
+        [ManagementReportController::class, 'pdf']
+    )->name('reports.pdf');
 });
 
 Route::middleware('guest')->group(function () {

@@ -98,6 +98,12 @@ const mainNavItems: NavItem[] = [
         href: '/mutual-transfers',
         icon: Users,
     },
+
+    {
+        title: 'Management Reports',
+        href: '/reports',
+        icon: FileText,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
